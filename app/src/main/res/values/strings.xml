@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Sunshineapp</string>
+    <string name="weather_data"> Weather Data</string>
 </resources>
