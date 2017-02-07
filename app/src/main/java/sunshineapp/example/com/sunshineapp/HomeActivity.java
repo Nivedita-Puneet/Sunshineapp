@@ -1,14 +1,24 @@
 package sunshineapp.example.com.sunshineapp;
 
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.io.IOException;
+import java.net.URL;
+
+import sunshineapp.example.com.sunshineapp.Utilities.NetworkUtils;
+import sunshineapp.example.com.sunshineapp.Utilities.WeatherJsonUtils;
+
 public class HomeActivity extends AppCompatActivity {
 
     TextView mWeatherTextView;
+
+    static String TAG = HomeActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,10 +29,10 @@ public class HomeActivity extends AppCompatActivity {
 
     private void initializeControls(){
         mWeatherTextView = (TextView)findViewById(R.id.weather_data);
-        displayDummyWeatherData(mWeatherTextView);
+        displayWeatherDataFromCloud();
     }
 
-    private void displayDummyWeatherData(TextView mWeatherTextView){
+    /*private void displayDummyWeatherData(TextView mWeatherTextView){
 
         String[] dummyWeatherData = {
                 "Today, May 17 - Clear - 17°C / 15°C",
@@ -45,6 +55,44 @@ public class HomeActivity extends AppCompatActivity {
 
             mWeatherTextView.append(dummyWeatherDay + "\n\n\n");
 
+        }
+
+    }*/
+
+    private void displayWeatherDataFromCloud(){
+        new FetchWeatherTask().execute("2142");
+    }
+
+    private class FetchWeatherTask extends AsyncTask<String, Void, String[]>{
+
+        @Override
+        protected String[] doInBackground(String... params) {
+
+            if(params.length == 0){
+                return null;
+            }
+
+            String location = params[0];
+            URL httpWeatherUrl = NetworkUtils.buildUrl("2142");
+            try {
+
+                String httpWeatherJSONResponse = NetworkUtils.getResponseFromHttpURL(httpWeatherUrl);
+                String[] parsedWeatherJSON = WeatherJsonUtils.getWeatherAttributesFromJSON(HomeActivity.this, httpWeatherJSONResponse);
+                return parsedWeatherJSON;
+            }catch (IOException  exception){
+                Log.e(TAG, exception.getLocalizedMessage());
+            }
+
+            return null;
+        }
+
+        @Override
+        protected  void  onPostExecute(String[] weatherData){
+            if(weatherData != null){
+                for(String weatherString: weatherData){
+                   mWeatherTextView.append((weatherString) + "\n\n\n");
+                }
+            }
         }
 
     }

@@ -12,7 +12,6 @@
         android:layout_width="wrap_content"
         android:id="@+id/weather_data"
         android:layout_height="wrap_content"
-        android:text="@string/weather_data"
         android:padding="16dp"
         android:textSize="20sp"/>
     </ScrollView>

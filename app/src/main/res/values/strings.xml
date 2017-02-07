@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">Sunshineapp</string>
     <string name="weather_data"> Weather Data</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
 </resources>
