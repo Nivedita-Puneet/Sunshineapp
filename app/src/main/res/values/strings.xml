@@ -3,4 +3,6 @@
     <string name="weather_data"> Weather Data</string>
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
+    <string name="refresh_data">Refresh</string>
+    <string name="error_message"> Error displaying data from cloud</string>
 </resources>
