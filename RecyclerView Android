@@ -1,0 +1,12 @@
+Recycler view in android has been introduced in order to improve efficiency related to network call, It can bind n number of data to listview or Staggered Grid view.
+ALGORITHM involved in using Recycler view is as follows
+Add a compatible view used for Recycler view in Build.gradle file
+Add a recycler view in layout file
+Create an Adapter which extends RecyclerView.Adapter<Generic>; the generic being view holder class which binds or holds the data.
+Create a layout which inflates List item layout.
+We need to override three methods in adapter the first one is onCreateViewHolder which inflates list item layout and returns Viewholder object associated with it.
+The second is onBindViewHolder which holds the data for an individual item in list view
+The last being getItemCount which returns the length of an array of Arraylist
+Finally we need to wire up in UI using LayoutManager class.
+setLayoutManager to RecyclerView.
+Use an interface in order to handle click listeners for list item.
