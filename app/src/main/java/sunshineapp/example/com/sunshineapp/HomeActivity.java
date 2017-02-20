@@ -1,5 +1,6 @@
 package sunshineapp.example.com.sunshineapp;
 
+import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -59,8 +60,10 @@ public class HomeActivity extends AppCompatActivity {
         mForecastAdapter = new ForecastAdapter(new ForecastAdapter.ForecastAdapterOnClickHandler() {
             @Override
             public void clickListener(String weatherForToday) {
-                
-                Toast.makeText(HomeActivity.this,weatherForToday,Toast.LENGTH_LONG).show();
+
+                Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
+                intent.putExtra("WeatherForToday", weatherForToday);
+                startActivity(intent);
             }
         });
         mRecyclerView.setAdapter(mForecastAdapter);
