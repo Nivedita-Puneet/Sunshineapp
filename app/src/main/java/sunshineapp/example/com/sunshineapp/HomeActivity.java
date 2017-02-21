@@ -1,11 +1,13 @@
 package sunshineapp.example.com.sunshineapp;
 
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,9 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.net.URL;
@@ -25,7 +24,7 @@ import java.net.URL;
 import sunshineapp.example.com.sunshineapp.Utilities.NetworkUtils;
 import sunshineapp.example.com.sunshineapp.Utilities.WeatherJsonUtils;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String[]> {
 
     private TextView mErrorMessageDisplay;
     private RecyclerView mRecyclerView;
@@ -33,7 +32,7 @@ public class HomeActivity extends AppCompatActivity {
     private ProgressBar mLoadingIndicator;
 
     static String TAG = HomeActivity.class.getSimpleName();
-
+    final static  int SUNSHINE_WEATHER_CODE = 101;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,14 +66,11 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
         mRecyclerView.setAdapter(mForecastAdapter);
-        displayWeatherDataFromCloud();
+        getSupportLoaderManager().initLoader(SUNSHINE_WEATHER_CODE, null, HomeActivity.this);
+       
     }
 
-    private void displayWeatherDataFromCloud(){
 
-        showWeatherDataView();
-        new FetchWeatherTask().execute("2142");
-    }
 
     private void showWeatherDataView(){
 
@@ -87,59 +83,72 @@ public class HomeActivity extends AppCompatActivity {
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
-    private class FetchWeatherTask extends AsyncTask<String, Void, String[]>{
+    @Override
+    public Loader<String[]> onCreateLoader(int id, Bundle args) {
 
+        return new AsyncTaskLoader<String[]>(this) {
 
-        @Override
-        protected void onPreExecute(){
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-        @Override
-        protected String[] doInBackground(String... params) {
+            String[] mWeatherData = null;
+            @Override
+            protected void onStartLoading(){
+                super.onStartLoading();
+                if(mWeatherData != null){
+                    deliverResult(mWeatherData);
+                }else{
+                    mLoadingIndicator.setVisibility(View.VISIBLE);
+                    forceLoad();
+                }
 
-            if(params.length == 0){
+            }
+            @Override
+            public String[] loadInBackground() {
+                URL httpWeatherUrl = NetworkUtils.buildUrl("2142");
+                try {
+
+                    String httpWeatherJSONResponse = NetworkUtils.getResponseFromHttpURL(httpWeatherUrl);
+                    String[] parsedWeatherJSON = WeatherJsonUtils.getWeatherAttributesFromJSON(HomeActivity.this, httpWeatherJSONResponse);
+                    for (int i = 0; i < parsedWeatherJSON.length; i++) {
+                        Log.i(HomeActivity.class.getSimpleName(), parsedWeatherJSON[i]);
+                    }
+
+                    return parsedWeatherJSON;
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
                 return null;
             }
 
-            String location = params[0];
-            URL httpWeatherUrl = NetworkUtils.buildUrl(location);
-            try {
-
-                String httpWeatherJSONResponse = NetworkUtils.getResponseFromHttpURL(httpWeatherUrl);
-                String[] parsedWeatherJSON = WeatherJsonUtils.getWeatherAttributesFromJSON(HomeActivity.this, httpWeatherJSONResponse);
-                for(int i=0; i<parsedWeatherJSON.length; i++){
-                    Log.i(HomeActivity.class.getSimpleName(), parsedWeatherJSON[i]);
-                }
-
-                return parsedWeatherJSON;
-            }catch (IOException  exception){
-                Log.e(TAG, exception.getLocalizedMessage());
+            public void deliverResult(String[] data){
+                mWeatherData = data;
+                super.deliverResult(data);
             }
 
-            return null;
-        }
+        };
+    }
 
-        @Override
-        protected  void  onPostExecute(String[] weatherData){
-
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if(weatherData != null){
-                showWeatherDataView();
-                mForecastAdapter.setWeatherData(weatherData);
-            }else {
-                showErrorMessage();
-            }
+    @Override
+    public void onLoadFinished(Loader<String[]> loader, String[] data) {
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        if(data != null){
+            showWeatherDataView();
+            mForecastAdapter.setWeatherData(data);
+        }else {
+            showErrorMessage();
         }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<String[]> loader) {
 
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem){
         switch (menuItem.getItemId()){
             case R.id.action_refresh:
                 mForecastAdapter.setWeatherData(null);
-                displayWeatherDataFromCloud();
+                getSupportLoaderManager().restartLoader(SUNSHINE_WEATHER_CODE, null, HomeActivity.this);
                 return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
