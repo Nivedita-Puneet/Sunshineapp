@@ -67,7 +67,7 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         });
         mRecyclerView.setAdapter(mForecastAdapter);
         getSupportLoaderManager().initLoader(SUNSHINE_WEATHER_CODE, null, HomeActivity.this);
-       
+
     }
 
 
