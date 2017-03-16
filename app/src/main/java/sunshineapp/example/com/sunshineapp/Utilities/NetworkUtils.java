@@ -42,7 +42,9 @@ public class NetworkUtils {
 
     public static URL buildUrl(String locationQuery){
 
-        StringBuilder stringBuilder = new StringBuilder(locationQuery).append(",").append("Sydney");
+       // StringBuilder stringBuilder = new StringBuilder(locationQuery).append(",").append("Sydney");
+        StringBuilder stringBuilder = new StringBuilder(locationQuery);
+
         Log.i(NetworkUtils.class.getSimpleName(), stringBuilder.toString());
 
         Uri builtUri = Uri.parse(DYNAMIC_WEATHER_URL).buildUpon().

@@ -1,6 +1,7 @@
 package sunshineapp.example.com.sunshineapp;
 
 import android.content.Intent;
+import android.support.v4.app.NavUtils;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -49,7 +50,13 @@ public class DetailActivity extends AppCompatActivity {
         switch (menuItem.getItemId()){
             case R.id.action_share:
                     menuItem.setIntent(shareWeatherDetails(mIntent+FORECAST_SHARE_HASHTAG));
-                 return true;
+                    return true;
+            case R.id.settings:
+                  startActivity(new Intent(DetailActivity.this, SettingsActivity.class));
+                  return true;
+            case android.R.id.home:
+                    NavUtils.navigateUpFromSameTask(this);
+                    return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
         }

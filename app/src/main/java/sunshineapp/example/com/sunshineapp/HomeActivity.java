@@ -2,7 +2,9 @@ package sunshineapp.example.com.sunshineapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
@@ -23,8 +25,10 @@ import java.net.URL;
 
 import sunshineapp.example.com.sunshineapp.Utilities.NetworkUtils;
 import sunshineapp.example.com.sunshineapp.Utilities.WeatherJsonUtils;
+import sunshineapp.example.com.sunshineapp.data.SunshinePreferences;
 
-public class HomeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String[]> {
+public class HomeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String[]> ,
+        SharedPreferences.OnSharedPreferenceChangeListener{
 
     private TextView mErrorMessageDisplay;
     private RecyclerView mRecyclerView;
@@ -33,6 +37,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
 
     static String TAG = HomeActivity.class.getSimpleName();
     final static  int SUNSHINE_WEATHER_CODE = 101;
+    private static  boolean HAS_PREFERENCES_BEEN_UPDATED = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,9 +74,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
         mRecyclerView.setAdapter(mForecastAdapter);
         getSupportLoaderManager().initLoader(SUNSHINE_WEATHER_CODE, null, HomeActivity.this);
 
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
     }
-
-
 
     private void showWeatherDataView(){
 
@@ -102,7 +107,8 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
             }
             @Override
             public String[] loadInBackground() {
-                URL httpWeatherUrl = NetworkUtils.buildUrl("2142");
+                String preferredLocation = SunshinePreferences.getPreferredWeatherLocation(HomeActivity.this);
+                URL httpWeatherUrl = NetworkUtils.buildUrl(preferredLocation);
                 try {
 
                     String httpWeatherJSONResponse = NetworkUtils.getResponseFromHttpURL(httpWeatherUrl);
@@ -150,10 +156,33 @@ public class HomeActivity extends AppCompatActivity implements LoaderManager.Loa
                 mForecastAdapter.setWeatherData(null);
                 getSupportLoaderManager().restartLoader(SUNSHINE_WEATHER_CODE, null, HomeActivity.this);
                 return true;
+            case R.id.action_settings:
+                startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
     }
 
+    @Override
+    public void onStart(){
+        super.onStart();
+        if(HAS_PREFERENCES_BEEN_UPDATED){
+            getSupportLoaderManager().restartLoader(SUNSHINE_WEATHER_CODE, null, HomeActivity.this);
+            HAS_PREFERENCES_BEEN_UPDATED = false;
 
+        }
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+        HAS_PREFERENCES_BEEN_UPDATED = true;
+    }
 }

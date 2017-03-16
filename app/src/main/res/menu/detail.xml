@@ -27,4 +27,10 @@
         android:orderInCategory="1"
         android:title="@string/share"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/settings"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:title="@string/settings"></item>
+
 </menu>
