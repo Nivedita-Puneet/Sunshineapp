@@ -41,6 +41,12 @@
                 android:value=".HomeActivity"></meta-data>-->
 
         </activity>
+        
+        <provider
+            android:authorities="sunshineapp.example.com.sunshineapp"
+            android:name="sunshineapp.example.com.sunshineapp.data.WeatherProvider"
+            android:exported="false">
+        </provider>
     </application>
 
 </manifest>
