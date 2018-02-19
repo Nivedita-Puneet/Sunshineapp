@@ -4,6 +4,10 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import dalvik.annotation.TestTarget;
+
+import static sunshineapp.example.com.sunshineapp.data.WeatherContract.WeatherEntry.COLUMN_DATE;
+
 /**
  * Created by PUNEETU on 21-03-2017.
  */
@@ -11,7 +15,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class WeatherDBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "weather.db";
-    public static final int DATABASE_VERSION= 1;
+    public static final int DATABASE_VERSION= 2;
 
     public WeatherDBHelper(Context context){
         super(context,DATABASE_NAME,null,DATABASE_VERSION);
@@ -30,7 +34,7 @@ public class WeatherDBHelper extends SQLiteOpenHelper {
                  */
                         WeatherContract.WeatherEntry._ID               + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 
-                        WeatherContract.WeatherEntry.COLUMN_DATE       + " INTEGER NOT NULL, "                 +
+                        COLUMN_DATE       + " INTEGER NOT NULL,"                 +
 
                         WeatherContract.WeatherEntry.COLUMN_WEATHER_ID + " INTEGER NOT NULL, "                 +
 
@@ -41,7 +45,8 @@ public class WeatherDBHelper extends SQLiteOpenHelper {
                         WeatherContract.WeatherEntry.COLUMN_PRESSURE   + " REAL NOT NULL, "                    +
 
                         WeatherContract.WeatherEntry.COLUMN_WIND_SPEED + " REAL NOT NULL, "                    +
-                        WeatherContract.WeatherEntry.COLUMN_DEGREES    + " REAL NOT NULL" + ");";
+                        WeatherContract.WeatherEntry.COLUMN_DEGREES    + " REAL NOT NULL," +
+                        " UNIQUE (" + WeatherContract.WeatherEntry.COLUMN_DATE + ") ON CONFLICT REPLACE);";
 
         /*
          * After we've spelled out our SQLite table creation statement above, we actually execute
@@ -59,4 +64,6 @@ public class WeatherDBHelper extends SQLiteOpenHelper {
         onCreate(db);
 
     }
+
+
 }
